@@ -1,0 +1,147 @@
+.record{
+    border-radius: 50%;
+    background-image: url('resources/microphone.png');
+    background-size: cover;
+    background-position-x: 50%;
+    background-color: #ffffff;
+    border: 6px solid#454B57;
+    height: 135px;
+    width: 135px;    
+}
+
+.stop{
+    color: #ffffff;
+    background-image: url('resources/no-record.png');
+    background-size: cover;
+    background-position-x: 50%;
+    background-color: #ffffff;
+    margin-left: 130px;
+    border: none;    
+    height: 148px;
+    width: 148px;
+}
+
+.reset{
+    border-radius: 50%;
+    background-image: url('resources/synchronize.png');
+    background-size: cover;
+    width: 160px;
+    height: 160px;
+    margin-left: 130px;    
+    background-color: #ffffff;
+    border: none;    
+}
+
+.legend{
+    width: 100%;
+}
+
+h2{
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.color-legend {
+    height: 50px;
+    width: 14%;
+    color: rgba(100,100,100,0.2);
+    font-size: 14px;
+    text-align: right;
+    vertical-align: middle;
+    display: inline-block;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    
+}
+
+.angry{
+    background-color: #b30000;
+    background-image: url('resources/angry.png');
+    background-size: cover;
+    background-position-y: 80%;
+    
+}
+
+.disgust{
+    background-color: green;    
+    background-image: url('resources/disgust.jpg');
+    background-size: cover;    
+    background-position-y: 30%;
+}
+
+.fear{
+    background-color: #666;   
+    background-image: url('resources/fear.jpg');
+    background-size: cover;   
+    background-position-y: 35%;
+}
+
+.happy{
+    background-color: #ffbf00;
+    background-image: url('resources/happy.jpg');
+    background-size: cover;   
+    background-position-y: 31%;
+    
+}
+
+.surprise{
+    background-color: #F58B44;  
+    background-image: url('resources/surprise.jpg');
+    background-size: cover;     
+    background-position-y: 13%;    
+}
+
+.sad{
+    background-color: #000080;
+    background-image: url('resources/sad.jpg');
+    background-size: cover;   
+    background-position-y: 34%;
+}
+
+.neutral{
+    background-color: #ffffff;
+    color: lightgrey;
+    background-image: url('resources/neutral.png');
+    background-size: cover;  
+    background-position-y: 20%;
+    
+}
+
+#buttons{
+    margin-top: 50px;
+    text-align: center;
+}
+
+.footer-delimiter, .top-delimiter{
+    position: absolute;
+    bottom: 42px;
+    background-image: url('resources/footer.jpg');
+    width: 99.9%;
+    font-size: 11px;
+    background-size: cover;
+    height: 1px;
+    background-position-y: 40%;
+}
+
+.top-delimiter{
+    top:51px;
+    height: 2px;
+}
+
+footer{
+    position: absolute;
+    bottom: 0px;
+    background-image: url('resources/footer.jpg');
+    width: 99.9%;
+    font-size: 11px;
+    background-size: auto;
+    background-position-x: -15%;
+    height: 42px;
+    background-repeat: no-repeat;
+    background-position-y: 40%; /*46%*/
+    font-weight: 600;
+    text-align: right;
+}
+
+footer p{
+    padding-right: 50px;
+    margin-bottom: 0;
+} 
