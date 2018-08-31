@@ -57,7 +57,8 @@ export class SubComponent {
       //Cast to a File() type
       return <File>theBlob;
     }
-    var emotion_scores;
+    var emotion_scores_deepaffects;
+    var emotion_scores_empath;
     var browser = <any>navigator;  
     var headers = new Headers();  
     var audioCtx = new AudioContext();
@@ -76,7 +77,12 @@ export class SubComponent {
       happy: "rgb(255, 191, 0)", //HSB 45/100/100
       neutral: "rgb(255, 255, 255)",
       surprise: "rgb(245, 139, 68)",
-      sad: "rgb(0, 0, 128)", //HSB: 240/100/50
+      sad: "rgb(0, 0, 128)", //HSB: 240/100/50,
+      calm: "#c9aa88",
+      sorrow:"rgb(0, 0, 128)",
+      joy:"rgb(255, 191, 0)",
+      energy:"#FBD749",
+      anger:"rgb(179, 0, 0)"
     };  
 
     var emojis = {
@@ -118,29 +124,43 @@ export class SubComponent {
         browser.mediaDevices.getUserMedia(constraints).then((stream) => { 
 
         this.mediaRecorder = new MediaRecorder(stream);                       
-        var doc = new jsPDF('p', 'mm', 'letter');
-        doc.setFontSize(8);        
         
         this.mediaRecorder.ondataavailable = function(e) {
           chunks.push(e.data);
-          console.log("chunks: ", chunks);  
           var blob1 = new Blob([e.data], { 'type' : 'audio/wav; codecs=MS_PCM' });          
           var file1 = blobToFile(blob1, "my-recording.wav");   
-          var fd = new FormData(); 
-          var title = 'audio_recording_' + new Date().getTime();
+          var fd_deepaffects = new FormData(); 
+          var fd_empath = new FormData(); 
+          var title_deepaffects = 'audio_recording_' + new Date().getTime();
+          var title_empath = 'audio_recording_empath_' + new Date().getTime();          
           //append the audio file to form data to prepare it for uploading to conversion API on the backend
-          fd.append("audio", file1);
-          fd.append("title", title);
-          root.http.post( root.links.FfmpegConverter(), fd, { headers:headers }).subscribe((r: Response) => {   
+          fd_deepaffects.append("audio", file1);
+          fd_deepaffects.append("title", title_deepaffects );
+          fd_empath.append("audio", file1);
+          fd_empath.append("title", title_empath );
+
+          root.http.post( root.links.FfmpegConverter(), fd_deepaffects, { headers:headers }).subscribe((r: Response) => {   
             var conversion_result = r.json();
-            root.http.post( root.links.AffectsAnalysis(), { 'path': title }).subscribe((res: Response) => {                
+            root.http.post( root.links.AffectsAnalysis(), { 'path': title_deepaffects }).subscribe((res: Response) => {                
               var analyze_result = res.json();   
               if(analyze_result.status.code === 200)   
-                emotion_scores = analyze_result.data;     
+                emotion_scores_deepaffects = analyze_result.data;     
                          
             });
           });  
-          };
+
+          root.http.post( root.links.FfmpegConverter11025(), fd_empath, { headers:headers }).subscribe((r: Response) => {   
+            var conversion_result = r.json();
+            root.http.post( root.links.EmpathAnalysis(), { 'path':title_empath  }).subscribe((res: Response) => {                
+              var analyze_result = res.json();   
+              console.log(analyze_result);
+              if(analyze_result.status.code === 200 && analyze_result.data.error === 0 )   
+                emotion_scores_empath = analyze_result.data;                              
+            });
+          });  
+        };
+
+      
   
 
         this.mediaRecorder.onpause = ()=>{        
@@ -156,29 +176,33 @@ export class SubComponent {
             message +="  "+ speech+ "   ";               
             var speech_length = this.message.length;
 
-            console.log(this.message, speech_length, emotion_scores);
-            if(emotion_scores.length >0){
+            console.log(this.message, speech_length, emotion_scores_deepaffects, emotion_scores_empath);
+            if(emotion_scores_deepaffects  ){
               var counter = 0;
-              for(var i= 0; i< emotion_scores.length; i++){
-                if ((""+ emotion_scores[i].score+"").search("e")  !== -1 ){
-                  emotion_scores[i].score = 0;  
+              for(var i= 0; i< emotion_scores_deepaffects.length; i++){
+                if ((""+ emotion_scores_deepaffects[i].score+"").search("e")  !== -1 ){
+                  emotion_scores_deepaffects[i].score = 0;  
                 }                 
-                if(emotion_scores[i].score !== 0){
+                if(emotion_scores_deepaffects[i].score !== 0){
                 
-                var text = speech.substr( counter, parseInt((speech_length*emotion_scores[i].score).toFixed(1))  );
+                var text = speech.substr( counter, parseInt((speech_length*emotion_scores_deepaffects[i].score).toFixed(1))  );
                 var bit = document.createElement('span');
                 bit.innerHTML = text;
-                if(text.length > 0 ){
-                  bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:'+ colors[emotion_scores[i].emotion];
-                } else{
+                if(text.length > 0 && emotion_scores_empath){
+                  var predominant_emotion;
+                  if (Object.keys(emotion_scores_empath).length !== 0 && emotion_scores_empath.constructor === Object){
+                    predominant_emotion = Object.keys(emotion_scores_empath).reduce((a, b) => emotion_scores_empath[a] > emotion_scores_empath[b] ? a : b);
+                    console.log('empath predominant_emotion changed to: ', predominant_emotion);                   
+                  }       
+                  bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:'+ colors[emotion_scores_deepaffects[i].emotion] +'; text-decoration: none; border-bottom: 3px solid '+ colors[predominant_emotion]; 
+                } else {
                   bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:#ffffff';                  
                 }
                 document.body.appendChild(bit);
-                counter += parseInt((speech_length*emotion_scores[i].score ).toFixed(1));     
-                }             
-                                        
+                counter += parseInt((speech_length*emotion_scores_deepaffects[i].score ).toFixed(1));     
+                }                                                 
               }
-            }
+            } 
           }         
         };
 
@@ -212,6 +236,7 @@ export class SubComponent {
           console.log( this.mediaRecorder.state);
           if( this.mediaRecorder.state !== 'inactive'){
             this.ongoing_recording(); 
+            this.mediaRecorder.requestData();
           }
         };         
 
@@ -232,12 +257,12 @@ export class SubComponent {
             this.service.stop(); 
             setTimeout(()=>{
               this.service.start();
-            },280);
+            },299);
           
             this.mediaRecorder.start();
-            this.ongoing_recording();                
-          }
-        }, 3000);
+            this.ongoing_recording();                            
+          }          
+        }, 4900);
       };      
       
 
@@ -293,14 +318,8 @@ export class SubComponent {
           else{
             doc.text(content.length+40,40+space,spans[i].innerText+ '\n');           
           }
-
-          // doc.setTextColor(getRGBValues(color).r,getRGBValues(color).g,getRGBValues(color).b )
         }
-        // doc.text(50,50,content);
-        // doc.addHTML(spans, function(err,data){
-
           doc.save('Test1.pdf');            
-        // });
         }
       });        
     }
