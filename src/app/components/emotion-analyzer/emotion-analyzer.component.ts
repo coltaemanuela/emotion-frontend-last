@@ -177,8 +177,16 @@ export class SubComponent {
             var speech_length = this.message.length;
 
             console.log(this.message, speech_length, emotion_scores_deepaffects, emotion_scores_empath);
+            
+            if( emotion_scores_deepaffects == undefined || emotion_scores_empath == undefined ){
+              var bit = document.createElement('span');
+              bit.innerHTML = this.message;
+              bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:#ffffff';                  
+              document.body.appendChild(bit);    
+            }
             if(emotion_scores_deepaffects  ){
               var counter = 0;
+             
               for(var i= 0; i< emotion_scores_deepaffects.length; i++){
                 if ((""+ emotion_scores_deepaffects[i].score+"").search("e")  !== -1 ){
                   emotion_scores_deepaffects[i].score = 0;  
@@ -194,7 +202,7 @@ export class SubComponent {
                     predominant_emotion = Object.keys(emotion_scores_empath).reduce((a, b) => emotion_scores_empath[a] > emotion_scores_empath[b] ? a : b);
                     console.log('empath predominant_emotion changed to: ', predominant_emotion);                   
                   }       
-                  bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:'+ colors[emotion_scores_deepaffects[i].emotion] +'; text-decoration: none; border-bottom: 3px solid '+ colors[predominant_emotion]; 
+                  bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:'+ colors[emotion_scores_deepaffects[i].emotion] +'; text-decoration: none; border-bottom: 4px solid '+ colors[predominant_emotion]; 
                 } else {
                   bit.style.cssText = 'position:relative;width:60%;margin:0 auto;height:auto; background:#ffffff';                  
                 }
@@ -262,7 +270,7 @@ export class SubComponent {
             this.mediaRecorder.start();
             this.ongoing_recording();                            
           }          
-        }, 4900);
+        }, 4600);
       };      
       
 
